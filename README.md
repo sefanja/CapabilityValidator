@@ -101,4 +101,4 @@ MIT License — feel free to reuse, adapt, and contribute.
 ## 🔗 Acknowledgements
 
 - Built with [jArchi](https://github.com/archimatetool/archi-scripting-plugin)
-- Validation powered by [Ampersand](https://www.ampersandtarski.org/)
+- Validation powered by [Ampersand](https://github.com/AmpersandTarski/Ampersand)
