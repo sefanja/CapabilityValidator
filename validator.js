@@ -26,7 +26,7 @@ function writeToFile(content, name) {
 }
 
 /**
- * Transforms all elements and relationships in `collection` to Ampersand format.
+ * Transforms elements and relationships to Ampersand format.
  */
 function getModelContent(elements, relationships) {
     function toAmpersandType(s) {
@@ -214,9 +214,9 @@ function getRuleSelection(relationships){
 }
 
 /**
- * Returns the content of a rules file, given the `selection` of rules.
+ * Returns the content of a rules file, given the `selectedRules`.
  */
-function getRuleContent(selection) {
+function getRuleContent(selectedRules) {
     const el = 'Element';
     const bf = 'BusinessFunction';
     const bo = 'BusinessObject';
@@ -409,7 +409,7 @@ function getRuleContent(selection) {
     RELATION value[Property*Text] [UNI]`);
 
     // Add selected rules
-    selection.forEach(s => lines.push(rules[s]));
+    selectedRules.forEach(s => lines.push(rules[s]));
 
     // Add footer
     lines.push('ENDCONTEXT');
