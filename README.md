@@ -81,10 +81,10 @@ CapabilityValidator\
 ```
 
 ### 1. jArchi script installation
-To use the `validator.ajs` script inside Archi:
+To use the `validator.js` script inside Archi:
 1.  Open Archi
 2.  Go to `Scripts → Scripts Manager`, and click **New Archi Script**
-3.  Name the new script `CapabilityValidator`
+3.  Name the new script `CapabilityValidator.ajs`
 4.  In the script editor, paste the following line (adjust the path if needed):
 	```javascript
       load("C:\\Users\\YourName\\Downloads\\CapabilityValidator\\validator.js");
