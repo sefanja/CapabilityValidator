@@ -10,21 +10,6 @@ function escapeText(text) {
     return text ? text.replace(/\\/g, '\\\\').replace(/"/g, '\\"') : '';
 }
 
-function writeToFile(content, name) {
-    try {
-        const Paths = Java.type('java.nio.file.Paths');
-        const filePath = Paths.get(__DIR__, OUTPUT, name).toString();
-        const FileWriter = Java.type('java.io.FileWriter');
-        const BufferedWriter = Java.type('java.io.BufferedWriter');
-        const writer = new BufferedWriter(new FileWriter(filePath));
-        writer.write(content);
-        writer.close();
-    } catch (e) {
-        console.log('Error writing to file: ' + filePath);
-        console.log(e);
-    }
-}
-
 /**
  * Transforms elements and relationships to Ampersand format.
  */
@@ -109,7 +94,7 @@ function getModelContent(elements, relationships) {
 /**
  * Determines which rules should be checked, given the `relationships`.
  */
-function getRuleSelection(relationships){
+function getRelevantRules(relationships){
     function getRelationshipLevels(relationshipType, sourceType, targetType) {
         const relationShipLevels = [];
 
@@ -163,52 +148,27 @@ function getRuleSelection(relationships){
 
     const selectedRules = [];
 
-    // C0 (level prop)
-    selectedRules.push('C0');
+    selectedRules.push('C0'); // level prop
+    selectedRules.push('C1'); // one parent
+    selectedRules.push('C2'); // acyclic
+    selectedRules.push('C3'); // universal level
 
-    // C1 (one parent)
-    selectedRules.push('C1');
-
-    // C2 (acyclic)
-    selectedRules.push('C2');
-
-    // C3 (universal level)
-    selectedRules.push('C3');
-
-    // C4 (inheritance upward)
-    // C5 (exists downward)
-    ['access', 'aggregation', 'association', 'serving'].forEach(type => {
+    [['a', 'access'], ['g', 'aggregation'], ['o', 'association'], ['v', 'serving']]
+    .forEach(([symbol, type]) => {
         if (levels[type].length > 1) {
-            selectedRules.push(`C4_${type}`);
-            selectedRules.push(`C5_${type}`);
+            selectedRules.push(`C4_${symbol}`); // inheritance upward
+            selectedRules.push(`C5_${symbol}`); // exists downward
         }
     });
 
-    // C6 (must access)
-    selectRule('C6', ['access']);
-
-    // C7 (must be accessed)
-    selectRule('C7', ['access']);
-
-    // C8 (aggregated exactly once)
-    selectRule('C8', ['aggregation']);
-
-    // C9 (eventually aggregates)
-    selectRule('C9', ['aggregation', 'serving']);
-
-    // C10 (association allowed)
-    selectRule('C10', ['access', 'aggregation', 'association', 'processComposition', 'serving']);
-
-    // C11 (shared object)
-    if ($(selection).first().type === 'archimate-model') {
-        selectRule('C11', ['access', 'aggregation', 'association', 'processComposition', 'serving']);
-    }
-
-    // C12 (serving mirrorred)
-    selectRule('C12', ['access', 'aggregation', 'association', 'processComposition', 'serving']);
-
-    // C13 (connected graph)
-    selectRule('C13', ['access', 'aggregation', 'association', 'processComposition', 'serving']);
+    selectRule('C6', ['access']); // must access
+    selectRule('C7', ['access']); // must be accessed
+    selectRule('C8', ['aggregation']); // aggregated exactly once
+    selectRule('C9', ['aggregation', 'serving']); // eventually aggregates
+    selectRule('C10', ['access', 'aggregation', 'association', 'processComposition', 'serving']); // association allowed
+    selectRule('C11', ['access', 'aggregation', 'association', 'processComposition', 'serving']); // shared object
+    selectRule('C12', ['access', 'aggregation', 'association', 'processComposition', 'serving']); // serving mirrorred
+    selectRule('C13', ['access', 'aggregation', 'association', 'processComposition', 'serving']); // connected graph
 
     return selectedRules;
 }
@@ -246,6 +206,21 @@ function getRuleContent(selectedRules) {
 
     const M = meaning => `MEANING {+ ${meaning} +}\n            VIOLATION (TXT "(", SRC name[ArchiObject*Text], TXT ", ", TGT name[ArchiObject*Text], TXT ")")\n\n`;
 
+    function addLevelledRule(id, label, term, meaning) {
+        rules[id] = (rules[id] || '') + 
+            `RULE ${label}:
+            ${term}
+            ${M(meaning)}`;
+
+        SUPPORTED_LEVELS.forEach(level => {
+            const id_l = `${id}_L${level}`;
+            rules[id_l] = (rules[id_l] || '') +
+                `RULE ${label}_L${level}:
+                ${term.replace('|-', '/\\ ' + L(level) + ' |-')}
+                ${M('At level ' + level + ': ' + meaning)}`;
+        });
+    }
+
     const rules = {};
 
     // C0
@@ -282,105 +257,70 @@ function getRuleContent(selectedRules) {
             ${M('All leaf ' + type + ' elements share the same decomposition level.')}`;
     });
 
-    Object.entries({access: a, aggregation: g, association: o, serving: v}).forEach(([key, value]) => {
+    [[a, 'a', 'access'], [g, 'g', 'aggregation'], [o, 'o', 'association'], [v, 'v', 'serving']]
+    .forEach(([term, symbol, type]) => {
         // C4
-        rules['C4_' + key] = `RULE C4_${key}_inherited_upward:
-            ${c(el)};${value};${c(el)}~ |- ${I(el)} \\/ ${value}
-            ${M('If two elements have a(n) ' + key + ' relationship, their parents (if any) must as well.')}`;
+        rules['C4_' + symbol] = `RULE C4_${type}_inherited_upward:
+            ${c(el)};${term};${c(el)}~ |- ${I(el)} \\/ ${term}
+            ${M('If two elements have a(n) ' + type + ' relationship, their parents (if any) must as well.')}`;
 
         // C5
-        rules['C5_' + key] = `RULE C5_${key}_exists_downward:
-            ${value} |- ${c(el)};${value};${c(el)}~ \\/ (${I(el)}-${c(el)};${c(el)}~);${value};(${I(el)}-${c(el)};${c(el)}~)
-            ${M('If two elements have a(n) ' + key + ' relationship, at least one pair of children (if any) must as well.')}`;
+        rules['C5_' + symbol] = `RULE C5_${type}_exists_downward:
+            ${term} |- ${c(el)};${term};${c(el)}~ \\/ (${I(el)}-${c(el)};${c(el)}~);${term};(${I(el)}-${c(el)};${c(el)}~)
+            ${M('If two elements have a(n) ' + type + ' relationship, at least one pair of children (if any) must as well.')}`;
     });
 
     // C6
-    rules.C6 = `RULE C6_function_must_access_object:
-    ${I(bf)} |- ${a};${a}~
-    ${M('Each business function must access at least one business object.')}`;
+    addLevelledRule('C6', 'C6_function_must_access_object',
+        `${I(bf)} |- ${a};${a}~`,
+        'Each business function must access at least one business object.'
+    );
 
     // C7
-    rules.C7 = `RULE C7_object_is_accessed:
-        ${I(bo)} |- ${a}~;${a}
-        ${M('Each business object must be accessed by at least one business function.')}`;
+    addLevelledRule('C7', 'C7_object_is_accessed',
+        `${I(bo)} |- ${a}~;${a}`,
+        'Each business object must be accessed by at least one business function.'
+    );
 
     // C8
-    rules.C8 = `RULE C8_process_is_aggregated:
-        ${I(bp)} |- ${g}~;${g}
-        ${M('Each business process must be aggregated by at least one business function.')}`;
-    rules.C8 += `RULE C8_process_aggregated_only_once:
-        ${g};${g}~ |- ${I(bf)}
-        ${M('Each business process must be aggregated by at most one business function.')}`;
+    addLevelledRule('C8', 'C8_process_is_aggregated',
+        `${I(bp)} |- ${g}~;${g}`,
+        'Each business process must be aggregated by at least one business function.'
+    );
+    addLevelledRule('C8', 'C8_process_aggregated_only_once',
+        `${g};${g}~ |- ${I(bf)}`,
+        'Each business process must be aggregated by at most one business function.'
+    );
 
     // C9
-    rules.C9 = `RULE C9_function_eventually_aggregates_process:
-        ${I(bf)} |- (${I(bf)} \\/ ${v}+);${g};${g}~;(${I(bf)} \\/ ${v}~+)
-        ${M('Each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.')}`;
+    addLevelledRule('C9', 'C9_function_eventually_aggregates_process',
+        `${I(bf)} |- (${I(bf)} \\/ ${v}+);${g};${g}~;(${I(bf)} \\/ ${v}~+)`,
+        'Each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.'
+    );
 
     // C10
-    rules.C10 = `RULE C10_association_allowed:
-        ${o} |- ${a}~;(${I(bf)} \\/ ${v}~ \\/ ${g};${c(bp)}~+;${c(bp)}+;${g}~);${a}
-        ${M('An association relationship between business objects is allowed if they are accessed (1) by the same business function, (2) by functions with a serving relationship in the opposite direction, or (3) by functions that aggregate business processes with a common ancestor.')}`;
+    addLevelledRule('C10', 'C10_association_allowed',
+        `${o} |- ${a}~;(${I(bf)} \\/ ${v}~ \\/ ${g};${c(bp)}~+;${c(bp)}+;${g}~);${a}`,
+        'An association relationship between business objects is allowed if they are accessed (1) by the same business function, (2) by functions with a serving relationship in the opposite direction, or (3) by functions that aggregate business processes with a common ancestor.'
+    );
 
     // C11
-    rules.C11 = `RULE C11_shared_object:
-        ${a};${a}~ |- ${I(bf)} \\/ (${v} \\/ ${v}~);${a};${a}~ \\/ ${g};${c(bp)}~+;${c(bp)}+;${g}~
-        ${M('Business functions that access a common business object must (1) have a serving relationship to at least one other business function that accesses the same object, or (2) aggregate busines processes with a common ancestor.')}`;
+    addLevelledRule('C11', 'C11_shared_object',
+        `${a};${a}~ |- ${I(bf)} \\/ (${v} \\/ ${v}~);${a};${a}~ \\/ ${g};${c(bp)}~+;${c(bp)}+;${g}~`,
+        'Business functions that access a common business object must (1) have a serving relationship to at least one other business function that accesses the same object, or (2) aggregate busines processes with a common ancestor.'
+    );
 
     // C12
-    rules.C12 = `RULE C12_serving_mirrorred_by_association:
-        ${v} |- ${a};(${I(bo)} \\/ ${o}~);${a}~
-        ${M('Each serving relationship between business functions must have a corresponding association relationship between business objects in the opposite direction.')}`;
+    addLevelledRule('C12', 'C12_serving_mirrorred_by_association',
+        `${v} |- ${a};(${I(bo)} \\/ ${o}~);${a}~`,
+        'Each serving relationship between business functions must have a corresponding association relationship between business objects in the opposite direction.'
+    );
 
     // C13
-    rules.C13 = `RULE C13_connected_graph:
-        ${c(bp)}~+;${c(bp)}+ /\\ ${L()} |- ${g}~;${a};(${I(bo)} \\/ (${o} \\/ ${o}~)+);${a}~;${g}
-        ${M('At least one business object per descendant of a business process must be part of a connected graph.')}`;
-
-    SUPPORTED_LEVELS.forEach(level => {
-        // C6
-        rules[`C6_L${level}`] = `RULE C6_function_must_access_object_L${level}:
-            ${I(bf)} /\\ ${L(level)} |- ${a};${a}~
-            ${M('At level ' + level + ', each business function must access at least one business object.')}`;
-
-        // C7
-        rules[`C7_L${level}`] = `RULE C7_object_is_accessed_L${level}:
-            ${I(bo)} /\\ ${L(level)} |- ${a}~;${a}
-            ${M('At level ' + level + ', each business object must be accessed by at least one business function.')}`;
-
-        // C8
-        rules[`C8_L${level}`] = `RULE C8_process_is_aggregated_L${level}:
-            ${I(bp)} /\\ ${L(level)} |- ${g}~;${g}
-            ${M('At level ' + level + ', each business process must be aggregated by at least one business function.')}`;
-        rules[`C8_L${level}`] += `RULE C8_process_aggregated_only_once_L${level}:
-            ${g};${g}~ /\\ ${L(level)} |- ${I(bf)}
-            ${M('At level ' + level + ', each business process must be aggregated by at most one business function.')}`;
-
-        // C9
-        rules[`C9_L${level}`] = `RULE C9_function_eventually_aggregates_process_L${level}:
-            ${I(bf)} /\\ ${L(level)} |- (${I(bf)} \\/ ${v}+);${g};${g}~;(${I(bf)} \\/ ${v}~+)
-            ${M('At level ' + level + ', each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.')}`;
-
-        // C10
-        rules[`C10_L${level}`] = `RULE C10_association_allowed_L${level}:
-            ${o} /\\ ${L(level)} |- ${a}~;(${I(bf)} \\/ ${v}~ \\/ ${g};${c(bp)}~+;${c(bp)}+;${g}~);${a}
-            ${M('At level ' + level + ', an association relationship between business objects is allowed if they are accessed (1) by the same business function, (2) by functions with a serving relationship in the opposite direction, or (3) by functions that aggregate business processes with a common ancestor.')}`;
-
-        // C11
-        rules[`C11_L${level}`] = `RULE C11_shared_object_L${level}:
-            ${a};${a}~ /\\ ${L(level)} |- ${I(bf)} \\/ (${v} \\/ ${v}~);${a};${a}~ \\/ ${g};${c(bp)}~+;${c(bp)}+;${g}~
-            ${M('At level ' + level + ', business functions that access a common business object must (1) have a serving relationship to at least one other business function that accesses the same object, or (2) aggregate busines processes with a common ancestor.')}`;
-
-        // C12
-        rules[`C12_L${level}`] = `RULE C12_serving_mirrorred_by_access_L${level}:
-            ${v} /\\ ${L(level)} |- ${a};(${I(bo)} \\/ ${o}~);${a}~
-            ${M('At level ' + level + ', each serving relationship between business functions must have a corresponding association relationship between business objects in the opposite direction.')}`;
-
-        // C13
-        rules[`C13_L${level}`] = `RULE C13_connected_graph_L${level}:
-            ${c(bp)}~+;${c(bp)}+ /\\ ${L(level)} |- ${g}~;${a};(${I(bo)} \\/ (${o} \\/ ${o}~)+);${a}~;${g}
-            ${M('At level ' + level + ', at least one business object per descendant of a business process must be part of a connected graph.')}`;
-    });
+    addLevelledRule('C13', 'C13_connected_graph',
+        `${c(bp)}~+;${c(bp)}+ /\\ ${L()} |- ${g}~;${a};(${I(bo)} \\/ (${o} \\/ ${o}~)+);${a}~;${g}`,
+        'At least one business object per descendant of a business process must be part of a connected graph.'
+    );
 
     const lines = [];
 
@@ -421,37 +361,41 @@ function getRuleContent(selectedRules) {
  * Executes the Ampersand process and shows its output in the console.
  */
 function runAmpersand() {
-    const Paths = Java.type('java.nio.file.Paths');
     const File = Java.type('java.io.File');
     const ProcessBuilder = Java.type('java.lang.ProcessBuilder');
     const BufferedReader = Java.type('java.io.BufferedReader');
     const InputStreamReader = Java.type('java.io.InputStreamReader');
 
-    const ampersand = Paths.get(__DIR__, AMPERSAND, 'ampersand.exe').toString();
+    const ampersand = __DIR__ + 'ampersand/ampersand.exe';
     const pb = new ProcessBuilder(ampersand, 'check', RULES_FILE);
-    pb.directory(new File(Paths.get(__DIR__, OUTPUT)));
+    pb.directory(new File(__DIR__ + OUTPUT));
 
     try {
-        console.log('Running Ampersand:');
-
         const process = pb.start();
 
         const reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
         let line = null;
         while ((line = reader.readLine()) !== null) {
-            console.log('> ' + line);
+            console.log(line);
         }
-
-        const exitCode = process.waitFor();
-        console.log('Ampersand completed with exit code ' + exitCode);
-
     } catch (e) {
         console.log('Failed to run Ampersand: ' + e);
     }
 }
 
-console.clear();
-console.show();
+function writeToFile(content, name) {
+    try {
+        const filePath = __DIR__ + OUTPUT + '/' + name;
+        const FileWriter = Java.type('java.io.FileWriter');
+        const BufferedWriter = Java.type('java.io.BufferedWriter');
+        const writer = new BufferedWriter(new FileWriter(filePath));
+        writer.write(content);
+        writer.close();
+    } catch (e) {
+        console.log('Error writing to file: ' + filePath);
+        console.log(e);
+    }
+}
 
 function getUniqueConcepts(collection, type) {
     const concepts = [];
@@ -469,15 +413,17 @@ function getUniqueConcepts(collection, type) {
 const elements = getUniqueConcepts(selection, 'element');
 const relationships = getUniqueConcepts(selection, 'relationship');
 
-console.log(`Checking consistency of concepts in ${$(selection)}`);
+if (window.confirm(`Your selection ${$(selection)} contains ${elements.length} elements and ${relationships.length} relationships.\n\nRun validation now?`)) {
+    const modelContent = getModelContent(elements, relationships);
+    writeToFile(modelContent, MODEL_FILE);
 
-const modelContent = getModelContent(elements, relationships);
-writeToFile(modelContent, MODEL_FILE);
-console.log(`Written ${MODEL_FILE} with ${elements.length} elements and ${relationships.length} relationships`);
+    const relevantRules = getRelevantRules(relationships);
+    const ruleContent = getRuleContent(relevantRules);
+    writeToFile(ruleContent, RULES_FILE);
 
-const selectedRules = getRuleSelection(relationships);
-const ruleContent = getRuleContent(selectedRules);
-writeToFile(ruleContent, RULES_FILE);
-console.log(`Written ${RULES_FILE} with rules ${selectedRules.join(', ')}`);
-
-runAmpersand();
+    console.clear();
+    console.show();
+    console.log('Running Ampersand with rules ' + relevantRules.join(', ') + ':\n');
+    runAmpersand();
+    console.log(`\nValidation completed.`)
+}
