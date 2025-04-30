@@ -25,19 +25,18 @@ Frameworks like **TOGAF** and **BIZBOK** promote capability-based planning and v
 ## 📟 Example console output
 
 ```
-Checking consistency of concepts in [archimate-diagram-model: Default View]
-Written model.adl with 16 elements and 26 relationships
-Written rules.adl with rules C0, C1, C2, C3, C4_access, C5_access, C4_aggregation, C5_aggregation, C4_association, C5_association, C4_serving, C5_serving, C6, C7, C8, C9, C10, C12, C13
-Running Ampersand:
-> C:\Users\UserName\Downloads\CapabilityValidator\output\rules.adl:169:1 error:
->   There is a violation of RULE C10_association_allowed:
->     ("Customer", "Employee")
-> ------------------------------
-> C:\Users\605310\Downloads\CapabilityValidator\output\rules.adl:175:1 error:
->   There is a violation of RULE C12_serving_mirrorred_by_association:
->     ("Serve Customers", "Invoice and Collect")
-> ExitFailure 10
-Ampersand completed with exit code 10
+Running Ampersand with rules C0, C1, C2, C3, C6, C7, C8, C9, C10, C11, C12, C13:
+
+C:\Users\UserName\Downloads\CapabilityValidator\output\rules.adl:169:1 error:
+  There is a violation of RULE C10_association_allowed:
+    ("Customer", "Employee")
+------------------------------
+C:\Users\UserName\Downloads\CapabilityValidator\output\rules.adl:175:1 error:
+  There is a violation of RULE C12_serving_mirrorred_by_association:
+    ("Serve Customers", "Invoice and Collect")
+ExitFailure 10
+
+Validation completed.
 ```
 
 ## 🧪 What it checks
@@ -87,7 +86,7 @@ To use the `validator.js` script inside Archi:
 3.  Name the new script `CapabilityValidator.ajs`
 4.  In the script editor, paste the following line (adjust the path if needed):
 	```javascript
-      load("C:\\Users\\YourName\\Downloads\\CapabilityValidator\\validator.js");
+      load('C:/Users/UserName/Downloads/CapabilityValidator/validator.js');
 5.  Save the script
 
 ### 2. Ampersand setup
