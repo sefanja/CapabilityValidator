@@ -328,7 +328,7 @@ function getRuleContent(selectedRules) {
         ${M('Business functions that access a common business object must (1) have a serving relationship to at least one other business function that accesses the same object, or (2) aggregate busines processes with a common ancestor.')}`;
 
     // C12
-    rules.C12 = `RULE C12_serving_mirrorred_by_access:
+    rules.C12 = `RULE C12_serving_mirrorred_by_association:
         ${v} |- ${a};(${I(bo)} \\/ ${o}~);${a}~
         ${M('Each serving relationship between business functions must have a corresponding association relationship between business objects in the opposite direction.')}`;
 
@@ -438,7 +438,7 @@ function runAmpersand() {
 
         const reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
         let line = null;
-        while ((line = reader.readLine()) != null) {
+        while ((line = reader.readLine()) !== null) {
             console.log('> ' + line);
         }
 
