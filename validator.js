@@ -414,6 +414,9 @@ const elements = getUniqueConcepts(selection, 'element');
 const relationships = getUniqueConcepts(selection, 'relationship');
 
 if (window.confirm(`Your selection ${$(selection)} contains ${elements.length} elements and ${relationships.length} relationships.\n\nRun validation now?`)) {
+    console.clear();
+    console.show();
+
     const modelContent = getModelContent(elements, relationships);
     writeToFile(modelContent, MODEL_FILE);
 
@@ -421,8 +424,6 @@ if (window.confirm(`Your selection ${$(selection)} contains ${elements.length} e
     const ruleContent = getRuleContent(relevantRules);
     writeToFile(ruleContent, RULES_FILE);
 
-    console.clear();
-    console.show();
     console.log('Running Ampersand with rules ' + relevantRules.join(', ') + ':\n');
     runAmpersand();
     console.log(`\nValidation completed.`)
