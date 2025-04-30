@@ -107,7 +107,7 @@ function getModelContent(elements, relationships) {
 }
 
 /**
- * Determines which rules should be checked, given the elements and relationships in `collection`.
+ * Determines which rules should be checked, given the `relationships`.
  */
 function getRuleSelection(relationships){
     function getRelationshipLevels(relationshipType, sourceType, targetType) {
