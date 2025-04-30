@@ -34,7 +34,7 @@ Running Ampersand:
 >     ("Customer", "Employee")
 > ------------------------------
 > C:\Users\605310\Downloads\CapabilityValidator\output\rules.adl:175:1 error:
->   There is a violation of RULE C12_serving_mirrorred_by_access:
+>   There is a violation of RULE C12_serving_mirrorred_by_association:
 >     ("Serve Customers", "Invoice and Collect")
 > ExitFailure 10
 Ampersand completed with exit code 10
