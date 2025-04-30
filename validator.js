@@ -432,7 +432,7 @@ function runAmpersand() {
     pb.directory(new File(Paths.get(__DIR__, OUTPUT)));
 
     try {
-        console.log('Running Ampersand:\n');
+        console.log('Running Ampersand:');
 
         const process = pb.start();
 
@@ -443,7 +443,7 @@ function runAmpersand() {
         }
 
         const exitCode = process.waitFor();
-        console.log('\nAmpersand completed with exit code ' + exitCode);
+        console.log('Ampersand completed with exit code ' + exitCode);
 
     } catch (e) {
         console.log('Failed to run Ampersand: ' + e);
@@ -469,15 +469,15 @@ function getUniqueConcepts(collection, type) {
 const elements = getUniqueConcepts(selection, 'element');
 const relationships = getUniqueConcepts(selection, 'relationship');
 
-console.log(`Checking consistency of concepts in ${$(selection)}\n`);
+console.log(`Checking consistency of concepts in ${$(selection)}`);
 
 const modelContent = getModelContent(elements, relationships);
 writeToFile(modelContent, MODEL_FILE);
-console.log(`Written ${MODEL_FILE} with ${elements.length} elements and ${relationships.length} relationships\n`);
+console.log(`Written ${MODEL_FILE} with ${elements.length} elements and ${relationships.length} relationships`);
 
 const selectedRules = getRuleSelection(relationships);
 const ruleContent = getRuleContent(selectedRules);
 writeToFile(ruleContent, RULES_FILE);
-console.log(`Written ${RULES_FILE} with rules ${selectedRules.join(', ')}\n`);
+console.log(`Written ${RULES_FILE} with rules ${selectedRules.join(', ')}`);
 
 runAmpersand();
