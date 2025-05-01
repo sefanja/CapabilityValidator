@@ -41,19 +41,19 @@ Validation completed.
 
 ## 🧪 What it checks
 
-- C1: Each element (*business function*, *business object*, *business process*) has at most one parent.
-- C2: No element can be its own ancestor.
-- C3: All leaf elements share the same decomposition level.
-- C4: If two elements have a relationship other than composition, their parents (if any) must as well.
-- C5: If two elements have a relationship, at least one pair of children (if any) must as well.
-- C6: Each business function must access at least one business object.
-- C7: Each business object must be accessed by at least one business function.
-- C8: Each business process is aggregated by exactly one business function.
-- C9: Each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.
-- C10: An association relationship between business objects is allowed if they are accessed (1) by the same business function, (2) by functions with a serving relationship in the opposite direction, or (3) by functions that aggregate business processes with a common ancestor.
-- C11: Business functions that access a common business object must (1) have a serving relationship to at least one other business function that accesses the same object, or (2) aggregate busines processes with a common ancestor.
-- C12: Each serving relationship between business functions must have a corresponding association relationship between business objects in the opposite direction.
-- C13: At least one business object per descendant of a business process must be part of a connected graph.
+- **C1**: Each element (*business function*, *business object*, *business process*) has at most one parent.
+- **C2**: No element can be its own ancestor.
+- **C3**: All leaf elements share the same decomposition level.
+- **C4**: If two elements have a relationship other than composition, their parents (if any) must as well.
+- **C5**: If two elements have a relationship, at least one pair of children (if any) must as well.
+- **C6**: Each business function must access at least one business object.
+- **C7**: Each business object must be accessed by at least one business function.
+- **C8**: Each business process is aggregated by exactly one business function.
+- **C9**: Each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.
+- **C10**: An association relationship between business objects is allowed if they are accessed (1) by the same business function, (2) by functions with a serving relationship in the opposite direction, or (3) by functions that aggregate business processes with a common ancestor.
+- **C11**: Business functions that access a common business object must (1) have a serving relationship to at least one other business function that accesses the same object, or (2) aggregate busines processes with a common ancestor.
+- **C12**: Each serving relationship between business functions must have a corresponding association relationship between business objects in the opposite direction.
+- **C13**: At least one business object per descendant of a business process must be part of a connected graph.
 
 ## 🔧 Requirements
 
@@ -62,7 +62,7 @@ Validation completed.
 - [Ampersand](https://github.com/AmpersandTarski/Ampersand)
 
 
-## 📦 Installation (Windows)
+## 📦 Installation
 
 All files should be placed in a folder on your system, for example:
 ```
@@ -70,11 +70,11 @@ C:\Users\UserName\Downloads\CapabilityValidator\
 ```
 Folder contents after installation:
 ```
-CapabilityValidator\
+CapabilityValidator/
 ├── validator.js        # jArchi script
-├── ampersand\
+├── ampersand/
 │   └── ampersand       # Ampersand binary (.exe for Windows)
-└── output\             # Ampersand ADL files (created after first run)
+└── output/             # Ampersand ADL files (created after first run)
     ├── model.adl       # The selected Archi model subset in ADL format
     └── rules.adl       # The applicable Ampersand rules
 ```
@@ -90,7 +90,7 @@ To use the `validator.js` script inside Archi:
 5.  Save the script
 
 ### 2. Ampersand setup
-Manually download and extract the [Ampersand binaries](https://github.com/AmpersandTarski/Ampersand/releases) and place them in the `ampersand\` directory as shown above.
+Manually download and extract the [Ampersand binaries](https://github.com/AmpersandTarski/Ampersand/releases) and place them in the `ampersand/` directory as shown above.
 
 
 ## 📜 License
