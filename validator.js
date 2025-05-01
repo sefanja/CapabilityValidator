@@ -360,7 +360,7 @@ function runAmpersand() {
     const BufferedReader = Java.type('java.io.BufferedReader');
     const InputStreamReader = Java.type('java.io.InputStreamReader');
 
-    const ampersand = __DIR__ + 'ampersand/ampersand';
+    const ampersand = __DIR__ + AMPERSAND + '/ampersand';
     const pb = new ProcessBuilder(ampersand, 'check', RULES_FILE);
     pb.directory(new File(__DIR__ + OUTPUT));
 
@@ -391,26 +391,14 @@ function getUniqueConcepts(collection, type) {
 }
 
 const options = {
-    partial: '1. Validate selection against applicable rules',
-    full: '2. Validate full model against all rules',
-    adl: '3. Create a standalone ADL file to validate ARCHIMATE files'
+    full: 'FULL: validate full model against all rules',
+    partial: 'PARTIAL: validate selection against applicable rules',
+    standalone: 'STANDALONE: create a standalone ADL file to validate ARCHIMATE files'
 };
 const choice = '' + window.promptSelection(NAME, Object.values(options));
 
-if (choice === options.adl) {
-    const ruleContent = getRuleContent(true);
-    const filePath = __DIR__ + OUTPUT + '/' + STANDALONE_FILE;
-    $.fs.writeFile(filePath, ruleContent, 'UTF8');
-    window.alert(
-        'File written: ' + filePath + '\n\n' +
-        'Update the INCLUDE statement to point to your ARCHIMATE file.\n\n' +
-        'To validate your model, execute the command: ampersand check ' + STANDALONE_FILE
-    );
-}
-
 if (choice === options.partial || choice === options.full) {
     const collection = choice === options.full ? model : selection;
-
     const elements = getUniqueConcepts(collection, 'element');
     const relationships = getUniqueConcepts(collection, 'relationship');
 
@@ -421,18 +409,23 @@ if (choice === options.partial || choice === options.full) {
         const modelContent = getModelContent(elements, relationships);
         $.fs.writeFile(__DIR__ + OUTPUT + '/' + MODEL_FILE, modelContent, 'UTF8');
 
-        if (choice === options.partial) {
-            const relevantRules = getRelevantRules(elements, relationships);
-            const ruleContent = getRuleContent(false, relevantRules);
-            $.fs.writeFile(__DIR__ + OUTPUT + '/' + RULES_FILE, ruleContent, 'UTF8');
-            console.log(`Validating ${elements.length} elements and ${relationships.length} relationships in ${$(collection)} against ${relevantRules.join(', ')}:\n`);
-        } else {
-            const ruleContent = getRuleContent(false);
-            $.fs.writeFile(__DIR__ + OUTPUT + '/' + RULES_FILE, ruleContent, 'UTF8');
-            console.log('Validating the full model against all rules:\n');
-        }
+        const relevantRules = choice === options.partial ? getRelevantRules(elements, relationships) : undefined;
+        const ruleContent = getRuleContent(false, relevantRules);
+        $.fs.writeFile(__DIR__ + OUTPUT + '/' + RULES_FILE, ruleContent, 'UTF8');
 
+        console.log(`Validating ${elements.length} elements and ${relationships.length} relationships in ${$(collection)} against ${relevantRules ? relevantRules.join(', ') : 'all rules'}:\n`);
         runAmpersand();
         console.log(`\nValidation completed.`)
     }
+}
+
+if (choice === options.standalone) {
+    const ruleContent = getRuleContent(true);
+    const filePath = __DIR__ + OUTPUT + '/' + STANDALONE_FILE;
+    $.fs.writeFile(filePath, ruleContent, 'UTF8');
+    window.alert(
+        'File written: ' + filePath + '\n\n' +
+        'Update the INCLUDE statement to point to your ARCHIMATE file.\n\n' +
+        'To validate your model, execute the command: ampersand check ' + STANDALONE_FILE
+    );
 }
