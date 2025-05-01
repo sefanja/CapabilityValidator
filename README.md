@@ -25,7 +25,7 @@ Frameworks like **TOGAF** and **BIZBOK** promote capability-based planning and v
 ## 📟 Example console output
 
 ```
-Running Ampersand with rules C0, C1, C2, C3, C6, C7, C8, C9, C10, C11, C12, C13:
+Validating 109 elements and 196 relationships in [archimate-diagram-model: N3 value stream P.A] against C0, C1, C2, C3, C6_L3, C7_L3, C8_L3, C9_L3, C10_L3, C11_L3, C12_L3, C13_L3:
 
 C:\Users\UserName\Downloads\CapabilityValidator\output\rules.adl:169:1 error:
   There is a violation of RULE C10_association_allowed:
@@ -73,7 +73,7 @@ Folder contents after installation:
 CapabilityValidator\
 ├── validator.js        # jArchi script
 ├── ampersand\
-│   ├── ampersand.exe   # Ampersand binary
+│   └── ampersand       # Ampersand binary (.exe for Windows)
 └── output\             # Ampersand ADL files (created after first run)
     ├── model.adl       # The selected Archi model subset in ADL format
     └── rules.adl       # The applicable Ampersand rules
