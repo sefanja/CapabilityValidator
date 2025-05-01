@@ -1,6 +1,6 @@
 # CapabilityValidator
 
-**CapabilityValidator** is a validation tool for *Business Capability Models* built in [Archi](https://www.archimatetool.com/), using the [jArchi](https://github.com/archimatetool/archi-scripting-plugin) scripting plugin and [Ampersand](https://www.ampersandtarski.org/) as formal constraint engine.
+**CapabilityValidator** is a validation tool for *Business Capability Models* built in [Archi](https://www.archimatetool.com/), using the [jArchi](https://github.com/archimatetool/archi-scripting-plugin) scripting plugin and [Ampersand](https://github.com/AmpersandTarski/Ampersand) as formal constraint engine.
 
 It supports **incremental modeling** and helps architects maintain structural and semantic consistency across multiple decomposition levels of business capabilities, value streams, and business objects.
 
