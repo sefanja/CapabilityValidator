@@ -25,7 +25,7 @@ Frameworks like **TOGAF** and **BIZBOK** promote capability-based planning and v
 ## 📟 Example console output
 
 ```
-Validating 109 elements and 196 relationships in [archimate-diagram-model: N3 value stream P.A] against C0, C1, C2, C3, C6_L3, C7_L3, C8_L3, C9_L3, C10_L3, C11_L3, C12_L3, C13_L3:
+Validating 109 elements and 196 relationships in [archimate-diagram-model: L3 value stream P.A] against C0, C1, C2, C3, C6_L3, C7_L3, C8_L3, C9_L3, C10_L3, C11_L3, C12_L3, C13_L3:
 
 C:\Users\UserName\Downloads\CapabilityValidator\output\rules.adl:169:1 error:
   There is a violation of RULE C10_association_allowed:
@@ -41,7 +41,8 @@ Validation completed.
 
 ## 🧪 What it checks
 
-- **C1**: Each element (*business function*, *business object*, *business process*) has at most one parent.
+- **C0**: Each element (*business function*, *business object*, *business process*) is assigned a supported and sequential decomposition level.
+- **C1**: Each element has at most one parent.
 - **C2**: No element can be its own ancestor.
 - **C3**: All leaf elements share the same decomposition level.
 - **C4**: If two elements have a relationship other than composition, their parents (if any) must as well.
@@ -76,7 +77,8 @@ CapabilityValidator/
 │   └── ampersand       # Ampersand binary (.exe for Windows)
 └── output/             # Ampersand ADL files (created after first run)
     ├── model.adl       # The selected Archi model subset in ADL format
-    └── rules.adl       # The applicable Ampersand rules
+    ├── rules.adl       # The applicable Ampersand rules
+    └── standalone.adl  # All consistency rules for standalone use
 ```
 
 ### 1. jArchi script installation
