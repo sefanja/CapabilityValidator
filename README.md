@@ -81,7 +81,10 @@ CapabilityValidator/
     └── standalone.adl  # All consistency rules for standalone use
 ```
 
-### 1. jArchi script installation
+### 1. Archi setup
+Install [Archi](https://www.archimatetool.com/) and the [jArchi plugin](https://github.com/archimatetool/archi-scripting-plugin).
+
+### 2. jArchi script installation
 To use the `validator.js` script inside Archi:
 1.  Open Archi
 2.  Go to `Scripts → Scripts Manager`, and click **New Archi Script**
@@ -91,7 +94,7 @@ To use the `validator.js` script inside Archi:
       load('C:/Users/UserName/Downloads/CapabilityValidator/validator.js');
 5.  Save the script
 
-### 2. Ampersand setup
+### 3. Ampersand setup
 Manually download and extract the [Ampersand binaries](https://github.com/AmpersandTarski/Ampersand/releases) and place them in the `ampersand/` directory as shown above.
 
 
