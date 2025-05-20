@@ -1,9 +1,9 @@
-﻿const NAME = 'CapabilityValidator';
+const NAME = 'CapabilityValidator';
 const OUTPUT = 'output';
 const AMPERSAND = 'ampersand';
 const MODEL_FILE = 'model.adl';
-const STANDALONE_FILE = 'standalone.adl';
 const RULES_FILE = 'rules.adl';
+const STANDALONE_FILE = 'standalone.adl';
 const LEVEL = 'Level';
 const MAX_LEVEL = 4;
 const SUPPORTED_LEVELS = [...Array(MAX_LEVEL + 1).keys()].map(String);
@@ -26,7 +26,7 @@ function getModelContent(elements, relationships) {
     // Add header
     lines.push('CONTEXT Model');
 
-    // Add elements names
+    // Add element names
     const elementTypes = [...new Set(elements.map(e => e.type))];
     elementTypes.forEach(type => {
         const population = elements.filter(e => e.type === type)
@@ -40,7 +40,7 @@ function getModelContent(elements, relationships) {
     // Add element levels
     elementTypes.forEach(type => {
         const population = elements.filter(e => e.type === type)
-            .flatMap(e => e.prop(LEVEL, true).map(level => `    ( "${e.id}" , "${escapeText(level)}" )`));
+            .flatMap(e => (e.prop(LEVEL, true) || []).map(level => `    ( "${e.id}" , "${escapeText(level)}" )`));
         lines.push(`RELATION level [${toAmpersandType(type)}*Level]`);
         lines.push(`POPULATION level [${toAmpersandType(type)}*Level] CONTAINS [`);
         lines.push(population.join(',\n'));
@@ -100,7 +100,7 @@ function getRelevantRules(elements, relationships){
     }
 
     function selectRule(ruleName, relationshipTypes) {
-        if (relationshipTypes.every(type => levels[type].length === levels.all.length)) {
+        if (relationshipTypes.every(type => levels[type].length > 0 && levels[type].length === levels.all.length)) {
             selectedRules.push(ruleName);
         } else {
             levels.all.forEach(level => {
