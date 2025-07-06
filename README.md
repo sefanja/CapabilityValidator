@@ -13,6 +13,8 @@ Frameworks like **TOGAF** and **BIZBOK** promote capability-based planning and v
 - Allowing **partial models** to be validated incrementally
 - Providing fast feedback **inside Archi** without requiring model completion
 
+This tool assumes the use of elements from ArchiMate's Business Layer, namely: **Business Function** (for modeling business capabilities), **Business Process** (for value streams) en **Business Object**.
+
 ## ▶️ Typical usage
 
 1. Open Archi, select one or more views or folders
