@@ -137,8 +137,8 @@ function getRelevantRules(elements, relationships){
 
     selectRule('C6', ['access']); // must access
     selectRule('C7', ['access']); // must be accessed
-    selectRule('C8', ['aggregation']); // aggregated exactly once
-    selectRule('C9', ['aggregation', 'serving']); // eventually aggregates
+    selectRule('C8', ['aggregation', 'serving']); // eventually aggregates
+    selectRule('C9', ['aggregation']); // aggregated exactly once
     selectRule('C10', ['access', 'aggregation', 'association', 'processComposition', 'serving']); // association allowed
     selectRule('C11', ['access', 'aggregation', 'association', 'processComposition', 'serving']); // shared object
     selectRule('C12', ['access', 'aggregation', 'association', 'processComposition', 'serving']); // serving mirrorred
@@ -233,12 +233,18 @@ function getRuleContent(standalone, selectedRules) {
             ${M('All leaf ' + type + ' elements share the same decomposition level.')}`;
     });
 
-    [[a, 'a', 'access'], [g, 'g', 'aggregation'], [o, 'o', 'association'], [v, 'v', 'serving']]
+    [[a, 'a', 'access'], [g, 'g', 'aggregation'], [v, 'v', 'serving']]
     .forEach(([term, symbol, type]) => {
         // C4
-        rules['C4_' + symbol] = `RULE C4_${type}_inherited_upward:
-            ${c(el)};${term};${c(el)}~ |- ${I(el)} \\/ ${term}
-            ${M('If two elements have a(n) ' + type + ' relationship, their parents (if any) must as well.')}`;
+        if (type === 'serving') {
+            rules['C4_' + symbol] = `RULE C4_${type}_inherited_upward:
+                ${c(el)};${term};${c(el)}~ |- ${I(el)} \\/ ${term} \\/ ${g};${c(bp)}~+;${c(bp)}+;${g}~
+                ${M('If two elements have a(n) ' + type + ' relationship, their parents (if any) must as well.')}`;
+        } else {
+            rules['C4_' + symbol] = `RULE C4_${type}_inherited_upward:
+                ${c(el)};${term};${c(el)}~ |- ${I(el)} \\/ ${term}
+                ${M('If two elements have a(n) ' + type + ' relationship, their parents (if any) must as well.')}`;
+        }
 
         // C5
         rules['C5_' + symbol] = `RULE C5_${type}_exists_downward:
@@ -259,19 +265,19 @@ function getRuleContent(standalone, selectedRules) {
     );
 
     // C8
-    addLevelledRule('C8', 'C8_process_is_aggregated',
-        `${I(bp)} |- ${g}~;${g}`,
-        'Each business process must be aggregated by at least one business function.'
-    );
-    addLevelledRule('C8', 'C8_process_aggregated_only_once',
-        `${g};${g}~ |- ${I(bf)}`,
-        'Each business process must be aggregated by at most one business function.'
+    addLevelledRule('C8', 'C8_function_eventually_aggregates_process',
+        `${I(bf)} |- (${I(bf)} \\/ ${v}+);${g};${g}~;(${I(bf)} \\/ ${v}~+)`,
+        'Each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.'
     );
 
     // C9
-    addLevelledRule('C9', 'C9_function_eventually_aggregates_process',
-        `${I(bf)} |- (${I(bf)} \\/ ${v}+);${g};${g}~;(${I(bf)} \\/ ${v}~+)`,
-        'Each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.'
+    addLevelledRule('C9', 'C9_process_is_aggregated',
+        `${I(bp)} |- ${g}~;${g}`,
+        'Each business process must be aggregated by at least one business function.'
+    );
+    addLevelledRule('C9', 'C9_process_aggregated_only_once',
+        `${g};${g}~ |- ${I(bf)}`,
+        'Each business process must be aggregated by at most one business function.'
     );
 
     // C10
