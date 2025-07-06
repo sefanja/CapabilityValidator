@@ -42,15 +42,15 @@ Validation completed.
 ## 🧪 What it checks
 
 - **C0**: Each element (*business function*, *business object*, *business process*) is assigned a supported and sequential decomposition level.
-- **C1**: Each element has at most one parent.
+- **C1**: Each element may have at most one parent.
 - **C2**: No element can be its own ancestor.
-- **C3**: All leaf elements share the same decomposition level.
-- **C4**: If two elements have a relationship other than composition, their parents (if any) must as well.
-- **C5**: If two elements have a relationship, at least one pair of children (if any) must as well.
+- **C3**: All the leaf elements must occur at the same decomposition level.
+- **C4**: If two elements have a relationship other than composition, their parents (if any) must as well, unless the parent elements aggregate business processes with a common ancestor.
+- **C5**: If two elements have a relationship other than composition, at least one pair of children (if any) must as well.
 - **C6**: Each business function must access at least one business object.
 - **C7**: Each business object must be accessed by at least one business function.
-- **C8**: Each business process is aggregated by exactly one business function.
-- **C9**: Each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.
+- **C8**: Each business function must either (1) aggregate a business process or (2) serve another function, potentially through multiple serving relationships, that aggregates a business process.
+- **C9**: Each business process is aggregated by exactly one business function.
 - **C10**: An association relationship between business objects is allowed if they are accessed (1) by the same business function, (2) by functions with a serving relationship in the opposite direction, or (3) by functions that aggregate business processes with a common ancestor.
 - **C11**: Business functions that access a common business object must (1) have a serving relationship to at least one other business function that accesses the same object, or (2) aggregate busines processes with a common ancestor.
 - **C12**: Each serving relationship between business functions must have a corresponding association relationship between business objects in the opposite direction.
